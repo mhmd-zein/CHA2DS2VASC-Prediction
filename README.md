@@ -200,6 +200,6 @@ The repository was not cloned correctly or a file is missing. Re-run `git clone`
 
 | Class | Clinical meaning | Present in 2-class mode | Present in 3-class mode |
 |-------|-----------------|------------------------|------------------------|
-| 0 | *(fill in)* | Yes | Yes |
-| 1 | *(fill in — includes original class 2 in 2-class mode)* | Yes | Yes |
-| 2 | *(fill in)* | No (merged into class 1) | Yes |
+| 0 | Low Risk| Yes | Yes |
+| 1 | Medium Risk| No (merged into class 1) | Yes |
+| 2 | High Risk | Yes | Yes |
