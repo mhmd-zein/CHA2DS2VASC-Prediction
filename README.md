@@ -150,11 +150,17 @@ The script automatically detects which option you are using based on the folder 
 
 ## 4. Run Inference
 
+Specify whether the model should distinguish **2 classes** (binary) or **3 classes** (multi-class):
+
 ```bash
-python inference.py
+# Binary classification (classes 0 and 1 — original class 2 is merged into class 1):
+python inference.py --num_classes 2
+
+# Multi-class classification (classes 0, 1, and 2):
+python inference.py --num_classes 3
 ```
 
-That's it. No additional arguments are needed.
+Use whichever matches the model version provided to you.
 
 ---
 
@@ -165,10 +171,10 @@ Results are saved to `predictions/predictions.csv`.
 | Column | Description |
 |--------|-------------|
 | `patient_id` | Patient identifier (from filename) |
-| `predicted_class` | Predicted class label (0, 1, or 2) |
+| `predicted_class` | Predicted class label (0 or 1 for 2-class; 0, 1, or 2 for 3-class) |
 | `prob_class_0` | Model confidence for class 0 (0.0 – 1.0) |
 | `prob_class_1` | Model confidence for class 1 (0.0 – 1.0) |
-| `prob_class_2` | Model confidence for class 2 (0.0 – 1.0) |
+| `prob_class_2` | Model confidence for class 2 — **only present in 3-class mode** |
 | `true_label` | Ground truth label — only present when using Option B |
 
 When using Option B, accuracy, AUROC, F1, MCC, and Cohen's Kappa are also printed to the console.
@@ -192,8 +198,8 @@ The repository was not cloned correctly or a file is missing. Re-run `git clone`
 
 ## 7. Class Labels
 
-| Class | Clinical meaning |
-|-------|-----------------|
-| 0 | *(fill in)* |
-| 1 | *(fill in)* |
-| 2 | *(fill in)* |
+| Class | Clinical meaning | Present in 2-class mode | Present in 3-class mode |
+|-------|-----------------|------------------------|------------------------|
+| 0 | *(fill in)* | Yes | Yes |
+| 1 | *(fill in — includes original class 2 in 2-class mode)* | Yes | Yes |
+| 2 | *(fill in)* | No (merged into class 1) | Yes |

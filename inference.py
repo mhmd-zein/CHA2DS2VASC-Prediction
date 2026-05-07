@@ -3,11 +3,13 @@
 RASTA Retinal Classification — Inference
 
 Organize your images in the data/ folder as described in README.md, then run:
-    python inference.py
+    python inference.py --num_classes 2
+    python inference.py --num_classes 3
 
 Results are saved to predictions/predictions.csv.
 """
 
+import argparse
 import os
 import sys
 import torch
@@ -17,13 +19,27 @@ from Training.Models import Custom_Net
 from Data.Data_Loader import get_inference_dataloader, get_labeled_inference_dataloader
 from utils import set_seed, evaluate
 
-MODEL_PATH  = 'Results/model/final_model.pth'
-DATA_DIR    = 'data'
-MODALITIES  = ('sup', 'deep', 'cc')
-NUM_CLASSES = 3
-OUTPUT_DIR  = 'predictions'
-BATCH_SIZE  = 4
-SEED        = 42
+# ── Model paths (fill in the folder names before deploying) ─────────────────
+MODEL_PATH = {
+    2: 'Results/ /final_model.pth',   # ← path to the 2-class model
+    3: 'Results/ /final_model.pth',   # ← path to the 3-class model
+}
+# ────────────────────────────────────────────────────────────────────────────
+
+DATA_DIR   = 'data'
+MODALITIES = ('sup', 'deep', 'cc')
+OUTPUT_DIR = 'predictions'
+BATCH_SIZE = 4
+SEED       = 42
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description='RASTA Retinal Classification — Inference')
+    parser.add_argument(
+        '--num_classes', type=int, required=True, choices=[2, 3],
+        help='Number of classes: 2 (binary) or 3 (multi-class).'
+    )
+    return parser.parse_args()
 
 
 def _has_labels(data_dir, modalities):
@@ -36,34 +52,43 @@ def _has_labels(data_dir, modalities):
 
 
 def main():
+    args = parse_args()
+    num_classes = args.num_classes
+    model_path  = MODEL_PATH[num_classes]
+
     set_seed(SEED)
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    print(f"Device: {device}")
+    print(f"Device:      {device}")
+    print(f"Mode:        {num_classes}-class")
 
     # ── Load model ───────────────────────────────────────────────────────────
-    if not os.path.isfile(MODEL_PATH):
-        sys.exit(f"Model file not found at '{MODEL_PATH}'. Check that the repository was cloned correctly.")
+    if not os.path.isfile(model_path):
+        sys.exit(f"Model file not found at '{model_path}'. Check that the repository was cloned correctly.")
 
     model = Custom_Net(
-        num_classes=NUM_CLASSES,
+        num_classes=num_classes,
         input_shape=[3, 256, 256],
         pretrained=False,
         dropout=0.0,
         Adaptive_input=False,
         version='b0',
     )
-    checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=False)
+    checkpoint = torch.load(model_path, map_location=device, weights_only=False)
     state_dict = checkpoint['network'] if 'network' in checkpoint else checkpoint
     model.load_state_dict(state_dict)
     model.to(device)
     model.eval()
-    print("Model loaded.")
+    print(f"Model loaded from: {model_path}")
 
     # ── Load data ────────────────────────────────────────────────────────────
-    labeled = _has_labels(DATA_DIR, MODALITIES)
+    labeled     = _has_labels(DATA_DIR, MODALITIES)
+    remap_cls2  = (num_classes == 2)   # remap class 2 → 1 only for the binary model
+
     if labeled:
         print("Ground truth labels detected — evaluation metrics will be computed.")
-        loader = get_labeled_inference_dataloader(DATA_DIR, BATCH_SIZE, 0, MODALITIES)
+        loader = get_labeled_inference_dataloader(
+            DATA_DIR, BATCH_SIZE, 0, MODALITIES, remap_class2=remap_cls2
+        )
     else:
         loader = get_inference_dataloader(DATA_DIR, BATCH_SIZE, 0, MODALITIES)
 
@@ -91,7 +116,7 @@ def main():
 
     # ── Results table ────────────────────────────────────────────────────────
     results = pd.DataFrame({'patient_id': all_ids, 'predicted_class': pred_cls})
-    for c in range(NUM_CLASSES):
+    for c in range(num_classes):
         results[f'prob_class_{c}'] = probs[:, c]
 
     if labeled:
@@ -107,7 +132,7 @@ def main():
         print(f"  Cohen's Kappa:   {m['kappa']:.4f}")
 
     print("\n=== Prediction Summary ===")
-    for c in range(NUM_CLASSES):
+    for c in range(num_classes):
         n = int((pred_cls == c).sum())
         print(f"  Class {c}: {n} patient(s) ({100 * n / len(pred_cls):.1f}%)")
 

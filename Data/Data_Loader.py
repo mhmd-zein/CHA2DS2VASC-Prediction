@@ -163,7 +163,7 @@ def get_inference_dataloader(data_dir, batch_size, num_workers, Needed_modalitie
     return DataLoader(ds, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
 
-def get_labeled_inference_dataset(data_dir, Needed_modalities=()):
+def get_labeled_inference_dataset(data_dir, Needed_modalities=(), remap_class2=True):
     """
     Load labeled images for inference + metric evaluation.
 
@@ -172,7 +172,7 @@ def get_labeled_inference_dataset(data_dir, Needed_modalities=()):
         ├── sup/
         │   ├── 0/    <- class 0 images
         │   ├── 1/    <- class 1 images
-        │   └── 2/    <- class 2 images (remapped to 1 to match training)
+        │   └── 2/    <- class 2 images
         ├── deep/
         │   ├── 0/
         │   ├── 1/
@@ -181,6 +181,9 @@ def get_labeled_inference_dataset(data_dir, Needed_modalities=()):
 
     Patient ID is extracted as the part of the filename before the first '_'.
     IDs must match across all modality folders and within the same class subfolder.
+
+    remap_class2: if True, label 2 is remapped to 1 (use for 2-class models).
+                  if False, label 2 is kept as-is (use for 3-class models).
     """
     ref_mod = Needed_modalities[0]
     ref_dir = os.path.join(data_dir, ref_mod)
@@ -195,8 +198,8 @@ def get_labeled_inference_dataset(data_dir, Needed_modalities=()):
             continue
 
         label = int(class_name)
-        if label == 2:
-            label = 1  # match the label mapping used during training
+        if remap_class2 and label == 2:
+            label = 1
 
         dirs = {m: os.path.join(data_dir, m, class_name) for m in Needed_modalities}
         if not all(os.path.isdir(d) for d in dirs.values()):
@@ -226,9 +229,9 @@ def get_labeled_inference_dataset(data_dir, Needed_modalities=()):
     return samples
 
 
-def get_labeled_inference_dataloader(data_dir, batch_size, num_workers, Needed_modalities=()):
+def get_labeled_inference_dataloader(data_dir, batch_size, num_workers, Needed_modalities=(), remap_class2=True):
     """DataLoader for labeled inference data (see get_labeled_inference_dataset for folder layout)."""
-    samples = get_labeled_inference_dataset(data_dir, Needed_modalities)
+    samples = get_labeled_inference_dataset(data_dir, Needed_modalities, remap_class2=remap_class2)
     transform = test_transforms_1_channel if len(Needed_modalities) == 1 else test_transforms_multi_channel
     ds = Dataset(data=samples, transform=transform)
     return DataLoader(ds, batch_size=batch_size, shuffle=False, num_workers=num_workers)
