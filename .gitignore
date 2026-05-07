@@ -1,0 +1,10 @@
+__pycache__/
+*.pyc
+wandb/
+*.pth
+myenv/
+.env
+main.ipynb
+.venv/
+Results/
+Datasets/RASTA2/
