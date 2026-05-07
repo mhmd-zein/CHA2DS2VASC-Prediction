@@ -57,24 +57,11 @@ git --version
 ### Step 3 — Clone the repository
 
 ```bash
-git clone https://github.com/<your-org>/<your-repo>.git
-cd <your-repo>
+git clone https://github.com/mhmd-zein/CHA2DS2VASC-Prediction.git
+cd CHA2DS2VASC-Prediction
 ```
 
-> Replace `<your-org>/<your-repo>` with the actual GitHub repository URL provided to you.
-
-### Step 4 — Place the model file
-
-Copy the model checkpoint file (`final_model.pth`) provided by the research team into the `Results/` folder, or any location you prefer. You will point to it with `--model_path` when running inference.
-
-```
-RASTA_Classification/
-└── Results/
-    └── my_model/
-        └── final_model.pth   ← place it here (folder name is your choice)
-```
-
-### Step 5 — Create a virtual environment (recommended)
+### Step 4 — Create a virtual environment (recommended)
 
 ```bash
 # Create the environment
@@ -87,7 +74,7 @@ rasta_env\Scripts\activate
 source rasta_env/bin/activate
 ```
 
-### Step 6 — Install dependencies
+### Step 5 — Install dependencies
 
 ```bash
 pip install -r requirements_inference.txt
@@ -103,22 +90,24 @@ pip install -r requirements_inference.txt
 
 ## 3. What You Need Before Starting
 
-You need **three things**:
+You need **two things**:
 
 | Item | Description |
 |------|-------------|
-| **Model file** | A `.pth` file provided by the research team (e.g., `final_model.pth`) |
-| **Model parameters** | The configuration used to train the model (modalities, channels, version — provided alongside the model file) |
+| **Run command** | The exact `python inference.py ...` command provided by the research team, which specifies the correct model path and parameters for your dataset |
 | **Patient images** | Your OCTA images organized in the folder layout described in Section 4 |
 
-The model parameters that **must match training** are:
+The research team will tell you the exact command to run. It will look like this (values filled in for you):
 
-| Parameter | Example values | Provided by research team |
-|-----------|---------------|---------------------------|
-| `--modalities` | `sup`, `sup deep cc`, `sup deep cc perf_maps` | Yes |
-| `--input_channels` | `1`, `3`, `4` | Yes |
-| `--num_classes` | `3` | Yes (default: 3) |
-| `--model_version` | `b0`, `b4`, `v2s` | Yes (default: b0) |
+```bash
+python inference.py \
+    --model_path  Results/my_experiment/final_model.pth \
+    --modalities  sup deep cc \
+    --input_channels 3 \
+    --data_dir    /path/to/your/images
+```
+
+The only thing **you** need to fill in is `--data_dir`, pointing to your organized image folder.
 
 ---
 
@@ -222,7 +211,7 @@ data_dir/
 
 ## 5. Running Inference
 
-Open a terminal, activate your virtual environment (see Step 5), and navigate to the cloned repository folder:
+Open a terminal, activate your virtual environment (see Step 4), and navigate to the cloned repository folder:
 
 ```bash
 cd <your-repo>
@@ -240,11 +229,7 @@ python inference.py \
     --input_channels 3
 ```
 
-Replace:
-- `Results/my_experiment/final_model.pth` → path to the `.pth` file provided by the research team
-- `/path/to/your/images` → root of your data folder (the one containing `sup/`, `deep/`, etc.)
-- `sup deep cc` → the modalities the model was trained on (provided by research team)
-- `3` → number of input channels (provided by research team)
+The only value you change is `--data_dir` — point it to your data folder (the one containing `sup/`, `deep/`, etc.). All other arguments are provided to you by the research team.
 
 **Single-modality example:**
 ```bash
@@ -375,7 +360,7 @@ Run `python inference.py --help` at any time to see this table.
 ### "ModuleNotFoundError: No module named 'torch'"
 The virtual environment is not activated, or dependencies were not installed.
 ```bash
-# Activate the environment first (see Step 5), then:
+# Activate the environment first (see Step 4), then:
 pip install -r requirements_inference.txt
 ```
 
@@ -391,7 +376,7 @@ Possible causes:
 - The images have an unexpected file extension. Supported: `.bmp`, `.png`, `.jpg`, `.jpeg`, `.tiff`, `.tif`.
 
 ### "RuntimeError: Error(s) in loading state_dict"
-The `--num_classes`, `--input_channels`, or `--model_version` you provided does not match the model checkpoint. Use the values provided by the research team.
+The `--num_classes`, `--input_channels`, or `--model_version` in your command does not match the model checkpoint. Use the exact command provided by the research team without modifying those arguments.
 
 ### Prediction takes very long on CPU
 Normal for a CPU-only machine. With a batch of 4 and ~100 patients, expect 5–15 minutes depending on hardware. Use a GPU (`--device cuda`) to reduce this to under a minute.
