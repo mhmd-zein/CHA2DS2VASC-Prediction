@@ -1,10 +1,22 @@
 __pycache__/
 *.pyc
-wandb/
-*.pth
+wand
 myenv/
 .env
 main.ipynb
 .venv/
-Results/
 Dataset/RASTA2/
+Results/
+# Datasets folder — track the folder but ignore patient images inside it
+Datasets/*
+!Datasets/.gitkeep
+
+# Results — ignore all experiment folders except the two deployment models
+# Re# sults/*
+# !R# esults/2_class/
+# Re# sults/2_class/*
+# !R# esults/2_class/final_model.pth
+# !R# esults/3_class/
+# Re# sults/3_class/*
+# !R# esults/3_class/final_model.pth
+# et/RASTA2/RASTA2/
