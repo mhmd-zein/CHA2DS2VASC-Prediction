@@ -21,12 +21,12 @@ from utils import set_seed, evaluate
 
 # ── Model paths (fill in the folder names before deploying) ─────────────────
 MODEL_PATH = {
-    2: 'Results/ /final_model.pth',   # ← path to the 2-class model
-    3: 'Results/ /final_model.pth',   # ← path to the 3-class model
+    2: 'Results/2_class/final_model.pth',
+    3: 'Results/3_class/final_model.pth',
 }
 # ────────────────────────────────────────────────────────────────────────────
 
-DATA_DIR   = 'data'
+DATA_DIR   = 'Datasets'
 MODALITIES = ('sup', 'deep', 'cc')
 OUTPUT_DIR = 'predictions'
 BATCH_SIZE = 4

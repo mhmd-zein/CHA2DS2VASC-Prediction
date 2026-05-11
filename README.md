@@ -181,22 +181,7 @@ When using Option B, accuracy, AUROC, F1, MCC, and Cohen's Kappa are also printe
 
 ---
 
-## 6. Troubleshooting
-
-**`ModuleNotFoundError: No module named 'torch'`**
-The virtual environment is not active. Run `rasta_env\Scripts\activate` (Windows) or `source rasta_env/bin/activate` (Linux/macOS), then retry.
-
-**`No samples found`**
-- Confirm the `data/` folder exists at the root of the repository.
-- Confirm the subfolders are named exactly `sup`, `deep`, and `cc`.
-- Confirm the patient ID (the part before `_`) is the same across all three modality folders for each patient.
-
-**`Model file not found`**
-The repository was not cloned correctly or a file is missing. Re-run `git clone` and ensure all files downloaded.
-
----
-
-## 7. Class Labels
+## 6. Class Labels
 
 | Class | Clinical meaning | Present in 2-class mode | Present in 3-class mode |
 |-------|-----------------|------------------------|------------------------|
